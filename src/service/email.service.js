@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
 
@@ -19,10 +20,9 @@ function send(email, subject, html) {
 }
 
 function sendActivationLink(email, activationToken, name) {
-  const link = new URL(
-    `/auth/activation/${encodeURIComponent(name)}/${encodeURIComponent(activationToken)}`,
-    process.env.CLIENT_URL,
-  ).href;
+  const link = `${process.env.CLIENT_ADRESS}/auth/activation/${name}/${activationToken}`;
+
+  console.log(email);
 
   const html = `
     <h1>Account activation</h1>
@@ -34,10 +34,7 @@ function sendActivationLink(email, activationToken, name) {
 }
 
 function sendChangeEmailLink(newEmail, changeEmailToken, name) {
-  const link = new URL(
-    `/auth/setnewemail/${encodeURIComponent(name)}/${encodeURIComponent(changeEmailToken)}`,
-    process.env.CLIENT_URL,
-  ).href;
+  const link = `${process.env.CLIENT_ADRESS}/auth/set-new-email/${name}/${changeEmailToken}`;
 
   const html = `
     <h1>Confirm Your New Email Address</h1>
@@ -62,10 +59,7 @@ function sendEmailChangeConfirmation(oldEmail, newEmail) {
 }
 
 function sendResetPasswordLink(email, resetPasswordToken, name) {
-  const link = new URL(
-    `/reset-password/${encodeURIComponent(name)}/${encodeURIComponent(resetPasswordToken)}`,
-    process.env.CLIENT_URL,
-  ).href;
+  const link = `${process.env.CLIENT_ADRESS}/auth/reset-password/${name}/${resetPasswordToken}`;
 
   const html = `
     <h1>Reset Password</h1>

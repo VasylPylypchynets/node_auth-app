@@ -88,10 +88,10 @@ const register = async (req, res) => {
 };
 
 const activate = async (req, res) => {
-  const { activationId, name } = req.params;
+  const { activationToken, name } = req.params;
   const user = await usersRepository.getByName(name);
 
-  if (!user || user.activationToken !== activationId) {
+  if (!user || user.activationToken !== activationToken) {
     throw ApiError.NotFound('Activation link is invalid or has expired.');
   }
 

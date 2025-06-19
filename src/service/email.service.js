@@ -20,7 +20,7 @@ function send(email, subject, html) {
 }
 
 function sendActivationLink(email, activationToken, name) {
-  const link = `${process.env.CLIENT_ADRESS}/auth/activation/${name}/${activationToken}`;
+  const link = `${process.env.CLIENT_ADDRESS}/auth/activation/${name}/${activationToken}`;
 
   console.log(email);
 
@@ -34,7 +34,7 @@ function sendActivationLink(email, activationToken, name) {
 }
 
 function sendChangeEmailLink(newEmail, changeEmailToken, name) {
-  const link = `${process.env.CLIENT_ADRESS}/auth/set-new-email/${name}/${changeEmailToken}`;
+  const link = `${process.env.CLIENT_ADDRESS}/auth/set-new-email/${name}/${changeEmailToken}`;
 
   const html = `
     <h1>Confirm Your New Email Address</h1>
@@ -59,7 +59,7 @@ function sendEmailChangeConfirmation(oldEmail, newEmail) {
 }
 
 function sendResetPasswordLink(email, resetPasswordToken, name) {
-  const link = `${process.env.CLIENT_ADRESS}/auth/reset-password/${name}/${resetPasswordToken}`;
+  const link = `${process.env.CLIENT_ADDRESS}/auth/reset-password/${name}/${resetPasswordToken}`;
 
   const html = `
     <h1>Reset Password</h1>

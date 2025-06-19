@@ -19,7 +19,7 @@ function getByUserId(userId) {
 }
 
 function deleteByUserId(userId) {
-  return prisma.token.delete({
+  return prisma.token.deleteMany({
     where: { userId },
   });
 }

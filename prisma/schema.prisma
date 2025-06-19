@@ -20,22 +20,18 @@ model User {
   email              String    @unique
   name               String    @unique
   password           String
-  activationToken    String?   @map("activation_token")
-  resetPasswordToken String?   @map("reset_password_token")
-  changeEmailToken   String?   @map("change_email_token")
-  newEmail           String?   @map("new_email")
+  activationToken    String?
+  resetPasswordToken String?
+  changeEmailToken   String?
+  newEmail           String?
   token              Token?
-  createdAt          DateTime  @default(now()) @map("created_at")
-
-  @@map("user")
+  createdAt          DateTime  @default(now())
 }
 
 model Token {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int      @unique @map("user_id")
+  userId    Int      @unique
   token     String
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("tokens")
+  createdAt DateTime @default(now())
 }

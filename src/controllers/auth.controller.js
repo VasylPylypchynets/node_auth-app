@@ -47,7 +47,9 @@ const register = async (req, res) => {
     password: validatePassword(password),
   };
 
-  const errors = Object.fromEntries(Object.entries(validationErrors).filter(([, value]) => value != null));
+  const errors = Object.fromEntries(
+    Object.entries(validationErrors).filter(([, value]) => value != null),
+  );
 
   if (Object.keys(errors).length > 0) {
     throw ApiError.BadRequest('Validation error', errors);
@@ -69,12 +71,18 @@ const register = async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   const activationToken = uuid();
 
-  const user = await usersRepository.createUser(email, name, hashedPassword, activationToken);
+  const user = await usersRepository.createUser(
+    email,
+    name,
+    hashedPassword,
+    activationToken,
+  );
 
   await mailer.sendActivationLink(email, activationToken, name);
 
   res.status(201).json({
-    message: 'Registration successful. Please check your email to activate your account.',
+    message:
+      'Registration successful. Please check your email to activate account.',
     user: normalize(user),
   });
 };
@@ -107,7 +115,9 @@ const login = async (req, res) => {
   }
 
   if (user.activationToken) {
-    throw ApiError.BadRequest('Account is not activated. Please check your email.');
+    throw ApiError.BadRequest(
+      'Account is not activated. Please check your email.',
+    );
   }
 
   await sendAuthentication(res, user);
@@ -142,7 +152,7 @@ const logout = async (req, res) => {
   if (refreshToken) {
     const tokenFromDb = await tokensRepository.getByToken(refreshToken);
 
-    if(tokenFromDb) {
+    if (tokenFromDb) {
       await tokensRepository.deleteByUserId(tokenFromDb.userId);
     }
   }
@@ -157,11 +167,19 @@ const forgotPassword = async (req, res) => {
 
   if (user) {
     const resetPasswordToken = uuid();
+
     await usersRepository.setResetPasswordToken(user.email, resetPasswordToken);
-    await mailer.sendResetPasswordLink(user.email, resetPasswordToken, user.name);
+
+    await mailer.sendResetPasswordLink(
+      user.email,
+      resetPasswordToken,
+      user.name,
+    );
   }
 
-  res.json({ message: 'If an account with this email exists, a password reset link has been sent.' });
+  res.json({
+    message: 'If an account exists, a password reset link has been sent.',
+  });
 };
 
 const resetPassword = async (req, res) => {
@@ -185,6 +203,7 @@ const resetPassword = async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
+
   await usersRepository.resetPassword(user.email, hashedPassword);
   await usersRepository.setResetPasswordToken(user.email, null);
 
@@ -197,7 +216,7 @@ const changeName = async (req, res) => {
 
   const nameError = validateName(newName);
 
-  if(nameError) {
+  if (nameError) {
     throw ApiError.BadRequest('Validation failed', { name: nameError });
   }
 
@@ -213,88 +232,93 @@ const changeName = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
-    const { oldPassword, newPassword, confirmation } = req.body;
-    const { email } = req.user;
+  const { oldPassword, newPassword, confirmation } = req.body;
+  const { email } = req.user;
 
-    if (newPassword !== confirmation) {
-      throw ApiError.BadRequest("New password and confirmation do not match.");
-    }
+  if (newPassword !== confirmation) {
+    throw ApiError.BadRequest('New password and confirmation do not match.');
+  }
 
-    const passwordValidationError = validatePassword(newPassword);
+  const passwordValidationError = validatePassword(newPassword);
 
-    if (passwordValidationError) {
-      throw ApiError.BadRequest(passwordValidationError);
-    }
+  if (passwordValidationError) {
+    throw ApiError.BadRequest(passwordValidationError);
+  }
 
-    const user = await usersRepository.getByEmail(email);
-    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+  const user = await usersRepository.getByEmail(email);
+  const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
 
-    if (!isPasswordValid) {
-        throw ApiError.Unauthorized('Your old password is not correct.');
-    }
+  if (!isPasswordValid) {
+    throw ApiError.Unauthorized('Your old password is not correct.');
+  }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await usersRepository.resetPassword(email, hashedPassword);
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    res.json({ message: 'Password changed successfully.' });
+  await usersRepository.resetPassword(email, hashedPassword);
+
+  res.json({ message: 'Password changed successfully.' });
 };
 
 const changeEmail = async (req, res) => {
-    const { password, newEmail } = req.body;
-    const { email: oldEmail, name } = req.user;
+  const { password, newEmail } = req.body;
+  const { email: oldEmail, name } = req.user;
 
-    const emailValidationError = validateEmail(newEmail);
+  const emailValidationError = validateEmail(newEmail);
 
-    if(emailValidationError) {
-        throw ApiError.BadRequest(emailValidationError);
-    }
+  if (emailValidationError) {
+    throw ApiError.BadRequest(emailValidationError);
+  }
 
-    const user = await usersRepository.getByEmail(oldEmail);
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+  const user = await usersRepository.getByEmail(oldEmail);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordValid) {
-        throw ApiError.Unauthorized('Invalid password.');
-    }
+  if (!isPasswordValid) {
+    throw ApiError.Unauthorized('Invalid password.');
+  }
 
-    const existingUser = await usersRepository.getByEmail(newEmail);
+  const existingUser = await usersRepository.getByEmail(newEmail);
 
-    if(existingUser) {
-        throw ApiError.Conflict('This email is already in use.');
-    }
+  if (existingUser) {
+    throw ApiError.Conflict('This email is already in use.');
+  }
 
-    const changeEmailToken = uuid();
+  const changeEmailToken = uuid();
 
-    await usersRepository.setChangeEmailToken(oldEmail, changeEmailToken, newEmail);
-    await mailer.sendChangeEmailLink(newEmail, changeEmailToken, name);
+  await usersRepository.setChangeEmailToken(
+    oldEmail,
+    changeEmailToken,
+    newEmail,
+  );
+  await mailer.sendChangeEmailLink(newEmail, changeEmailToken, name);
 
-    res.json({ message: 'Confirmation link sent to new email address.' });
+  res.json({ message: 'Confirmation link sent to new email address.' });
 };
 
 const setNewEmail = async (req, res) => {
-    const { name, changeemailtoken } = req.params;
+  const { name, changeemailtoken } = req.params;
 
-    const user = await usersRepository.getByName(name);
+  const user = await usersRepository.getByName(name);
 
-    if (!user || user.changeEmailToken !== changeemailtoken || !user.newEmail) {
-        throw ApiError.BadRequest('Email confirmation link is invalid or expired.');
-    }
+  if (!user || user.changeEmailToken !== changeemailtoken || !user.newEmail) {
+    throw ApiError.BadRequest('Email confirmation link is invalid or expired.');
+  }
 
-    const oldEmail = user.email;
-    const newEmail = user.newEmail;
+  const oldEmail = user.email;
+  const newEmail = user.newEmail;
 
-    const existingUser = await usersRepository.getByEmail(newEmail);
+  const existingUser = await usersRepository.getByEmail(newEmail);
 
-    if(existingUser) {
-        throw ApiError.Conflict('This email address has been taken.');
-    }
+  if (existingUser) {
+    throw ApiError.Conflict('This email address has been taken.');
+  }
 
-    const updatedUser = await usersRepository.setNewEmail(oldEmail, newEmail);
-    
-    await usersRepository.setChangeEmailToken(updatedUser.email, null, null);
+  const updatedUser = await usersRepository.setNewEmail(oldEmail, newEmail);
 
-    await mailer.sendEmailChangeConfirmation(oldEmail, newEmail);
+  await usersRepository.setChangeEmailToken(updatedUser.email, null, null);
 
-    res.json({ message: 'Your email has been successfully updated.' });
+  await mailer.sendEmailChangeConfirmation(oldEmail, newEmail);
+
+  res.json({ message: 'Your email has been successfully updated.' });
 };
 
 export const authController = {

@@ -2,7 +2,12 @@ import { prisma } from '../utils/db.js';
 
 const createUser = async (email, name, password, activationToken) => {
   return prisma.user.create({
-    data: { email, name, password, activationToken },
+    data: {
+      email,
+      name,
+      password,
+      activationToken,
+    },
   });
 };
 

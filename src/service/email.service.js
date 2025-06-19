@@ -29,6 +29,7 @@ function sendActivationLink(email, activationToken, name) {
     <p>Please click the link below to activate your account:</p>
     <a href="${link}">${link}</a>
   `;
+
   return send(email, 'Account activation', html);
 }
 
@@ -42,6 +43,7 @@ function sendChangeEmailLink(newEmail, changeEmailToken, name) {
     <h1>Confirm Your New Email Address</h1>
     <a href="${link}">${link}</a>
   `;
+
   return send(newEmail, 'Confirm Your New Email', html);
 }
 
@@ -53,7 +55,9 @@ function sendEmailChangeConfirmation(oldEmail, newEmail) {
     <p>Your previous email was: <strong>${oldEmail}</strong></p>
     <p>Your new email is: <strong>${newEmail}</strong></p>
   `;
+
   send(newEmail, subject, html);
+
   return send(oldEmail, subject, html);
 }
 
@@ -68,6 +72,7 @@ function sendResetPasswordLink(email, resetPasswordToken, name) {
     <p>Click the link below to reset your password.</p>
     <a href="${link}">${link}</a>
   `;
+
   return send(email, 'Reset Password', html);
 }
 

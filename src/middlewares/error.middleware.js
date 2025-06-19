@@ -1,8 +1,6 @@
 import ApiError from '../exceptions/ApiError.js';
 
 export const globalErrorHandler = (err, req, res, next) => {
-  console.error(err);
-
   if (err instanceof ApiError) {
     return res
       .status(err.status)
